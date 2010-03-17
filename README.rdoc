@@ -1,6 +1,16 @@
 = stonewall
 
-Description goes here.
+Stonewall is a state-based access control language extracted from the StonePath Stateful Workflow Modeling Gem (which was itself an extraction on a couple of projects, which were based on an internal Java workflow tool dating back to ~1998).  Long roots, but the ideas are being freshly re-evaluated in the context of an awesome language.
+
+StoneWall is not meant to be stand-alone - it will likely make assumptions about ActiveRecord (or ActiveModel when I start thinking about Rails 3).  It will be wedded into some rails concepts like controlers, etc.
+
+== Why another ACL? Aren't there like, 30 of em?
+StoneWall wants to be a complimentary dsl in the model that works alongside the StonePath DSL, allowing access control to be based on not just objects, users, and roles, but also on the state of the object being accessed... as in "A data entry clerk has read/write access while we are in the data entry state, read-only while we are in the data validation state, and no access at all in any other state."
+
+Further, I have some opinions about where access control belongs.  Access control is a business logic thing, and belongs in the model.  How to deal with blocked access is a controller thing, and how to vary the display of data when your rights change is a view thing.  Several acl projects out there act as if it belongs in the controller.
+
+== What does it look like?
+There was an earlier, functional version in StonePath gems prior to 0.3.0.  This work will be based on that work, but I'm re-evaluating everything about that earlier implementation.  The first attempt at an extraction wasn't 'opinionated' enough, and it suffered because of it.
 
 == Note on Patches/Pull Requests
  

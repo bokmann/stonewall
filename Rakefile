@@ -6,10 +6,13 @@ begin
   Jeweler::Tasks.new do |gem|
     gem.name = "stonewall"
     gem.summary = %Q{extracting the acl constructs from stonepath}
-    gem.description = %Q{TODO: longer description of your gem}
+    gem.description = %Q{The acl from StoneWall, now as a shiny new gem!}
     gem.email = "dbock@codesherpas.com"
     gem.homepage = "http://github.com/bokmann/stonewall"
     gem.authors = ["bokmann"]
+    gem.add_dependency('activerecord','>= 2.0.0')
+    gem.add_dependency('sentient_user','>= 0.1.0')
+    
     gem.add_development_dependency "thoughtbot-shoulda", ">= 0"
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
