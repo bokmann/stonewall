@@ -1,0 +1,427 @@
+class Schpoo
+
+  stonewall do |acl|
+    #guarded methods are now deniedd unless specifically allowed.
+    acl.guard :method_name
+    acl.guard :group_name, [:method_names, :method2, :method3, :etc]
+
+    #multiple_role_policy :any | :all - this should actually be defined in an initializer, not the class
+
+    acl.access_for :assistant_manager do |role|
+      role.allow :all #magic that undoes all guards
+      role.allow :method_name
+      role.check :group_name, do |o, u|  #pass in the object being guarded & the person requesting access
+        #return true or false
+      end
+    end
+
+    acl.authorization :verb do |user, object|
+      # return true/false
+      # can now say current_user.may_verb_schpoo?(my_schpoo) just like Aegis
+      # note that if you don't pass in a schpoo, you can check for class-level access. Thats up to you.
+    end
+
+  end
+end
+
+
+# if someone calls a method on a model that they aren't allowed to access, it throws an AccessViolationException
+
+
+
+# overly verbose, but nice.  no exception, just true, false.
+user.may_call(:method).on(object)
+user.may_call_method_on_schpoo?(my_schpoo)  #less practical
+user.may_send(object, :method) # probably easiest to implement
+user.may_auth_verb_schpoo(my_schpoo)
+
+
+class Schpoo
+
+  stonewall do |acl|
+    #guarded methods are now deniedd unless specifically allowed.
+    acl.guard :method_name
+    acl.guard :group_name, [:method_names, :method2, :method3, :etc]
+
+    #multiple_role_policy :any | :all 
+
+    acl.varies_on(:aasm_state) do |variant|
+      variant.value("created") do |acl|
+        acl.access_for :assistant_manager do |role|
+          role.allow :all #magic that undoes all guards
+          role.allow :method_name
+          role.check :group_name, do |o, u|  #pass in the object being guarded & the person requesting access
+            #return true or false
+          end
+        end
+      end
+
+	    variant.value("approved") do |acl|
+      end
+    end
+  end
+end
+
+
+
+
+#This shows a variant that gets data out of the db.
+
+class Schpoo
+
+  stonewall do |acl|
+
+    # This is the same dsl, but since it is just ruby code, you can mix it
+    # with ruby code that gets the data from a database.
+    # This code below is notional, but we coudl set it up as part of the
+    # whole framework if we want to get that complicated.
+    
+    #acl.load_protected_groups_for(self.to_sym)
+    protected_groups = ProtectedGroups.find_by_class_name(self.to_sym)
+    protected_groups.each do |group|
+      acl.guard group.name.to_sym, group.methods
+    end
+
+    #acl.load_grants_policy_for(self.to_sym)
+    acl.varies_on(:aasm_state) do |variant|
+      states.each do |state|
+      	variant.value(state) do |acl|
+          roles.each do |role|
+	        acl.access_for role do |r|
+	          allowed_methods = Grant.find_by_class_name_and_role(self.to_sym, role)
+	          r.allow allowed_methods.collect{ |m| m.name.to_sym }
+	        end
+	      end
+      end
+    end
+  end
+end
+
+# from the db perspective, to keep things simple, we only support methods in
+# groups.  You can use a default group named "all" if you don't want to take
+# avantage of groups.
+#protected_groups_table                  # grouped_methods_table
+#id    name    stonewall_id                # protected_group_id    method
+
+
+#stonewalls_table
+# class_name  variant_attribute
+#(the Stonewall object will also list all roles, methods, and method groups)
+
+#grants_table
+#stonewall_id    variant    role    method    method_group
+
+
+class Schpoo
+  require stonewall
+  
+  stonewall.load_from_db
+  
+  stonewall do |acl|
+    acl.authorization :view do |user, object|
+      return ["administrator", "Developer", "Manager"].include?(user.role)
+    end
+  end
+end
+
+<% if current_user.may_view_schpoo? %>
+  <%# render link to view here %>
+<% end %>
+
+and use in your own before_filters to guard things like the show method.
+
+Schpoo.reload_stonewall_policy
+
+
+
+
+
+
+
+
+
+
+
+
+
+class Schpoo
+
+  stonewall do |acl|
+    # tells the framework that if roles specify nothing for a guarded method,
+    # default answer is allow  (this is the default setting)
+    check_default :allow
+
+    # tells the framework that if roles specify nothing for a guarded method,
+    # default answer is denied
+    check_default :deny
+
+
+    # tells the framework users have multiple roles to check, and
+    # if default mode is allow:
+    #   any deny is a denial
+    # if default mode is deny:
+    #   any allow is an allowal
+    multiple_role_policy :any  
+
+    # tells the framework users have multiple roles to check, and
+    # if default mode is allow:
+    #   all must deny for denial
+    # if default mode is deny:
+    #   all must allow for allowal
+    multiple_role_policy :all    #this is the default setting
+
+
+    # declare what you want to guard everything else is unchecked
+    acl.guard_method :save
+    acl.guard_method :name
+    acl.guard_method :name=
+    acl.guard_method :description
+    acl.guard_method :description=
+
+    #you can group them for easy reference below
+    acl.method_group :modifiers, [:save, :name=, :description=]
+    acl.method_group :accessors, [:name, :description]
+
+    acl.access_for :assistant_manager do |role_definition|
+      role_definition.deny :name=  #use deny when :check_default is :allow
+      role_definition.allow :name= #use allow when :check_default is deny
+      role_Definition.check :name=, { |object, user|
+        # used when you want to make up your mind at runtime.
+        return false
+      }
+    end
+
+    acl.access_for :peon do |role_definition}
+      role_definition.field_variant(:aasm_state) do |state|
+        state.variant(:in_process) do |variant_definition|
+          variant_definition.deny :name=
+          variant_definition.allow :name=
+          variant_definition.check :name=, { |object, user, variant, value| 
+            return false
+          } 
+
+        state.variant(:catch_all) ...
+    end
+  end
+
+end
+
+
+
+
+we could even have code blocks for getting the role when given a user, etc.
+
+
+
+
+
+
+
+
+
+
+- access control is business logic and should be defined in the domain
+- this is the kind of problem that can be specified with a terse internal dsl
+- access is granular on methods on the instance or class level (on domain objects)
+- the framework should stay out of the way unless I want it
+- when I mark a method as guarded, it should be denied unless the access control specifically allows it.
+- I will have a current_user attribute in my session
+- my current_user will have either:
+      a role method that returns:
+        a string of the role name
+          or
+        an object that has a .name method that returns the role name
+    or
+      a roles method that returns a collection of objects that match the above description
+- those role names will be used as part of the access control dsl
+- if any of a users roles grants them access, they have access
+- access control is governed by intersection of the users role and the method they are accessing
+- optionally, access control is also governed by some state of the accessed object
+- exceptions are reserved for exceptional circumstance
+- models should throw exceptions if an access violation is attempted
+- models should have a "can?" or 'may I?" methods that return true or false, so a prudent developer can avoid access exceptions
+- controllers and views should have a terse method of checking access so that they can have logic flows to avoid exposing illegal operations.
+- if the UI is designed well, an end user should not be able to generate access violation exceptions on the models
+- the framework should give a minimal api to allow good ui design.
+
+    <% if current_user.is_allowed?(:access_to => "save", :on => this_complaint) %>
+
+    <% if current_user.may_print?(this_complaint) %>
+
+    <% if current_user.may_<authorization>?(this_complaint) %>
+
+
+    my_model.allows?(:method_symbol) #uses current user
+    my.model.allows_for_user?(:method_symbol, user)
+
+
+
+
+
+    # acl thoughts -
+    # I might want to pull acl out into its own gem.
+    # If I do, then the acl.for_state will get complicated.
+    # I might make it something that can be modeled like this:
+    #
+    # acl.for_field(:aasm_state).has_value("in_process") do
+    # end
+    #
+    # which would make this a *lot* more reusable in different
+    # contexts.
+  
+    # -
+    # I think there is scizophrenia caused by the framework not
+    # committing to "deny unless access allowed" vs. "allow unless
+    # access denied".  I think the principal of least surprise would
+    # dictate we allow unless specifically denied, and I'm almost
+    # ready to commit to that.
+  
+    # -
+    # There are also issues when a use has one role vs. many roles.
+    # When there is one role, things are easy.
+    # When they have multiple roles, do we deny if _any_ of them are
+    # denied, or allow unless _all_ are denied?  I think POLS would
+    # say allow unless all denied... but then, which return block do
+    # we return?  Perhaps something simple like "the first one defined". 
+    #
+    # -
+    # as its own gem though, stonepath acl would need a name... hmm...
+    # what do you call something near a stonepath that restricts access
+    # in certain directions?  a stonewall!
+    #
+    # -
+    # defining things nested like state/role makes certain sense (as would
+    # role/state), but it makes answering some questions hard... for instance:
+    # "What are all the permissions that managers have? and "what are all the
+    # access_restrictions on the "in_process" state?  You have to look across
+    # several tasks.  PErhaps a rake task could help generate a report with
+    # this info for auditing purposes. 
+    stonepath_acl do |acl|
+
+       acl.guard_method :save
+       acl.guard_method :name=
+       acl.guard_method :name
+       acl.guard_method :regarding=
+       acl.guard_method :regarding
+       acl.guard_method :description
+       acl.guard_method :description=
+       acl.method_group :modifiers, [:save, :name=, :regarding=, :description=]
+       acl.method_group :accessors, [:name, :regarding, :description]
+
+       acl.for_state :in_process do |state|
+         state.access_for_role :manager do |role|
+           role.allow_method :name  #allow works if we are in deny first mode.
+         end
+
+         state.access_for_role :peon do |role|
+           role.deny_method :name=
+           role.deny_method :regarding=
+           role.deny_method(:description){  #value of block is returned.  might this need to be a proc?
+             "#{user.name}, You do not have access to look at the description, you peon!"
+           }
+         end
+
+         state.access_for_role :assistant_manager do |role|
+           role.check_method_access :method_symbol do
+             # you can implement conditional logic here.
+             # maybe you want to defer the true/false
+             # access decision and check some attribute of
+             # the user.
+             return false #your conditional answer.
+           end
+         end
+       end
+
+       acl.for_state :completed do |state|
+         state.access_for_role :manager do |role|
+           role.deny_method_group :modifiers
+         end
+
+         state.access_for_role :peon do |role|
+           role.deny_method_group :modifiers
+           role.deny_method_group :accessors
+         end
+
+       end
+     end
+
+
+
+
+
+in memory, the acl can be unrolled to a data structure like:
+[method][role][pivot]
+[method][role][pivot] = true | false
+
+
+
+class Person < ActiveRecord::Base
+  include StoneWall
+  
+  stonewall do |acl|
+      acl.guard :age
+      acl.guard :favorite_color
+      acl.method_group :privacy_factors, [:age, :favorite_color]
+      acl.varies_on :aasm_state
+    
+      acl.action :edit
+      acl.action :print
+      acl.action :subscribe_to
+      
+      role :manager do |manager|
+        manager.methods :privacy_factors
+        manager.actions [:edit, :print, :subscribe_to]
+      end
+    
+      role :clerk do |clerk|
+        clerk.variant :data_entry do |data_entry|
+          data_entry.methods :age
+          data_entry.actions :edit
+        end
+      end
+    end
+    
+    stonewall.permissions do |permissions|
+      permissions.add :edit |user, post| do
+        post.owner == user || user.is_an_admin?
+      end
+    end
+      
+end
+
+
+class Person < ActiveRecord::Base
+  include StoneWall
+  
+  stonewall do
+    varies_on :aasm_state    
+    guard :age
+    guard :favorite_color
+    method_group :privacy_factors, [:age, :favorite_color]
+      
+    role :manager do
+      allowed_methods :privacy_factors
+    end
+
+    role :clerk do
+      variant :data_entry do
+        allowed_method :age
+      end
+    end
+
+    action :edit do |person, user|
+      person.owner == user || user.is_administrator?
+    end
+
+    action :print do |person, user|
+      person.complete? && user.is_ogc_attorney?
+    end 
+  end
+end
+
+
+user.may_edit_person? person
+
+
+
+
