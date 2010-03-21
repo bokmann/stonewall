@@ -4,3 +4,4 @@ $:.unshift(File.dirname(__FILE__)) unless
 
 require File.expand_path(File.dirname(__FILE__)) + "/stonewall/stonewall.rb"
 require File.expand_path(File.dirname(__FILE__)) + "/stonewall/user_extensions.rb"
+require 'rails/active_record'

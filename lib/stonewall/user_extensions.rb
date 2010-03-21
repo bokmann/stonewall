@@ -33,17 +33,5 @@ module StoneWall
       object.class.stonewall.allowed?(object, self, method)
     end
 
-    # need to move this up one level I think
-    # def method_missing_with_stonewall(symb, *args)
-    #   method_name = symb.to_s
-    #   if method_name =~ /^may_(.+?)[\!\?]$/
-    #     args.first.class.stonewall.actions[$1.to_sym].call(args.first, self)
-    #   else
-    #     method_missing_without_stonewall(symb, *args)
-    #   end
-    # end
-    # 
-    # alias_method_chain :method_missing, :stonewall
-
   end
 end
