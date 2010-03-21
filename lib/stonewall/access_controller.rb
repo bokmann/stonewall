@@ -49,9 +49,15 @@ module StoneWall
     # and the method being accessed.   #should we fail secure?
     def allowed?(guarded_object, user, method)
       return true if (guarded_object.nil? || user.nil? || method.nil?)
-      v = variant_field ? guarded_object.send(variant_field).to_sym : :all
+      # if they can always view it, no need to check variant.
+      always = user.stonepath_role_info.detect do |r|
+        granted?(r, :all, :all) || granted?(r, :all, method)
+      end
+      return always if always
+      
+      v = guarded_object.send(variant_field).to_sym
       user.stonepath_role_info.detect do |r|
-        granted?(r, v, method)
+        granted?(r, v, :all) || granted?(r, v, method)
       end || false
     end
   end
