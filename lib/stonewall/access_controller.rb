@@ -60,5 +60,17 @@ module StoneWall
         granted?(r, v, :all) || granted?(r, v, method)
       end || false
     end
+    
+    def grants
+      grants = Array.new
+        @matrix.each do |r, vm|
+          vm.each do |v, methods|
+            methods.each do |m|
+              grants << [r, v, m]
+            end
+          end
+        end
+      return grants
+    end
   end
 end
