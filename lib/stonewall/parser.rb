@@ -6,7 +6,9 @@ module StoneWall
     end
 
     def allowed_method(*methods)
-      methods.each { |m| @parent.stonewall.add_grant(@role, @variant, m)}
+      methods.flatten.each do |m|
+        @parent.stonewall.add_grant(@role, @variant, m)
+      end
     end
 
     def allowed_methods(*methods)
@@ -14,7 +16,7 @@ module StoneWall
     end
     
     def allowed_method_group(*group_names)
-      group_names.each do |group_name|
+      group_names.flatten.each do |group_name|
         @parent.stonewall.method_groups[group_name].each do |m|
           allowed_method m
         end
