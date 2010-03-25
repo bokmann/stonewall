@@ -49,24 +49,7 @@ module StoneWall
 
     def guard(*methods)
       methods.each do |m|
-        @parent.stonewall.guarded_methods << m
-        aliased_target, punctuation = m.to_s.sub(/([?!=])$/, ''), $1
-        checked_method = "#{aliased_target}_with_stonewall#{punctuation}"
-        unchecked_method = "#{aliased_target}_without_stonewall#{punctuation}"    
-        # --------------
-        # This method is defined on the guarded class, so it is callable on
-        # objects of that class.  This is 1/3rd of the magic of this gem-
-        # if you declare 'schpoo' a guarded method, we generate this
-        # 'schpoo_with_stonewall' method. Elsewhere, we use alias_method_chain
-        # to wrap your original 'schpoo' method.
-        @parent.send(:define_method, checked_method) do |*args|
-          if stonewall.allowed?(self, User.current, m)
-            self.send(unchecked_method, *args)
-          else
-            raise "Access Violation"
-          end
-        end
-        # -------------- end of bizzaro meta-juju
+        StoneWall::Helpers.guard(@parent, m)
       end
     end
 

@@ -7,7 +7,7 @@ module StoneWall
     attr_reader :guarded_class
     attr_reader :variant_field
     attr_accessor :actions
-    attr_accessor :guarded_methods
+    attr_reader :guarded_methods
     attr_accessor :method_groups
 
     # the matrix is the money-shot of the access controller.  You can set it
@@ -42,6 +42,14 @@ module StoneWall
       matrix[r] && matrix[r][v] && matrix[r][v].include?(m)
     end
 
+    # This is similar to, but not the same as, the guard method on the parser.
+    # The parser has to wait until the methods are reified.  Since this is
+    # got adding guards at runtime, we don't have that restruction here.
+    def guard(method)
+      StoneWall::Helpers.guard(@guarded_class, method)
+      StoneWall::Helpers.fix_alias_for(@guarded_class, method)
+    end
+    
     # --------------
     # This is 1/3rd of the magic in this gem.  Every method you guard is
     # checked by this method. It looks at the matrix of permissions you built
@@ -49,13 +57,16 @@ module StoneWall
     # and the method being accessed.   #should we fail secure?
     def allowed?(guarded_object, user, method)
       return true if (guarded_object.nil? || user.nil? || method.nil?)
+      return true unless @guarded_methods.include?(method)
+      
       # if they can always view it, no need to check variant.
       always = user.stonepath_role_info.detect do |r|
         granted?(r, :all, :all) || granted?(r, :all, method)
       end
       return always if always
       
-      v = guarded_object.send(variant_field).to_sym
+      v = guarded_object.send(variant_field) &&
+          guarded_object.send(variant_field).to_sym
       user.stonepath_role_info.detect do |r|
         granted?(r, v, :all) || granted?(r, v, method)
       end || false
