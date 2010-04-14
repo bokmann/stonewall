@@ -33,5 +33,15 @@ module StoneWall
     def send?(method, user = User.current)
       self.class.stonewall.allowed?(self, user, method)
     end
+    alias_method :allowed?, :send?
+    
+    def send_method_group?(group_name, user = User.current)
+      self.class.stonewall.method_groups[group_name].each do |method|
+        return false unless self.send?(method, user)
+      end
+      return true
+    end
+    alias_method :allowed_method_group?, :send_method_group?
+    
   end
 end
