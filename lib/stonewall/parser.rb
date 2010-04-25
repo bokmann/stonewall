@@ -11,8 +11,7 @@ module StoneWall
       end
     end
 
-    def allowed_methods(*methods)
-      allowed_method(*methods)
+    alias_method :allowed_methods, :allowed_method
     end
     
     def allowed_method_group(*group_names)
@@ -23,8 +22,7 @@ module StoneWall
       end
     end
 
-    def allowed_method_groups(*group_names)
-      allowed_method_group(group_names)
+    alias_method :allowed_method_groups, :allowed_method_group
     end
     
     def method_group(name, methods)

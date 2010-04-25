@@ -26,6 +26,7 @@ module StoneWall
     end
     
     
+    # this is also a refactor-for-better-test opportunity.
     def self.guard(guarded_class, m)
       guarded_class.stonewall.guarded_methods << m
       aliased_target, punctuation = m.to_s.sub(/([?!=])$/, ''), $1

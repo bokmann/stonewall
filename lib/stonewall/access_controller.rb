@@ -55,6 +55,9 @@ module StoneWall
     # checked by this method. It looks at the matrix of permissions you built
     # in the dsl and allows or denies based on the guarded object, the user,
     # and the method being accessed.   #should we fail secure?
+    #
+    # this method is too complex - needs some refactoring to make it more
+    # easily testable
     def allowed?(guarded_object, user, method)
       return true if (guarded_object.nil? || user.nil? || method.nil?)
       return true unless @guarded_methods.include?(method)
