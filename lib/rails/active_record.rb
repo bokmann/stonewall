@@ -11,4 +11,7 @@ ActiveRecord::Base.class_eval do
   
   alias_method_chain :method_missing, :stonewall
   
+  
+  # need to fix the update_attributes, read_attribute, and write_attribute problem here.
+  
 end
