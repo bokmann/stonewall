@@ -63,14 +63,14 @@ module StoneWall
       return true unless @guarded_methods.include?(method)
       
       # if they can always view it, no need to check variant.
-      always = user.stonepath_role_info.detect do |r|
+      always = user.stonewall_role_info.detect do |r|
         granted?(r, :all, :all) || granted?(r, :all, method)
       end
       return always if always
       
       v = guarded_object.send(variant_field) &&
           guarded_object.send(variant_field).to_sym
-      user.stonepath_role_info.detect do |r|
+      user.stonewall_role_info.detect do |r|
         granted?(r, v, :all) || granted?(r, v, method)
       end || false
     end

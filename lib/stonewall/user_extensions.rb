@@ -11,7 +11,7 @@ module StoneWall
     # The only thing we require is that, if your role is a separate object,
     # it responds to a 'name' method with a string or a symbol that matches
     # the symbol you use when defining the permissions in your dsl.
-    def stonepath_role_info
+    def stonewall_role_info
       return @role_symbols if @role_symbols
       @role_symbols = Array.new
       if self.respond_to?(:role)

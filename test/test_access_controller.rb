@@ -31,6 +31,6 @@ class TestAccessController < Test::Unit::TestCase
     
     should "return 'true' if the method is nil"
     
-    should "call user.stonepath_role_info and iterate through the results calling granted?"
+    should "call user.stonewall_role_info and iterate through the results calling granted?"
   end
 end

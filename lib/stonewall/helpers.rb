@@ -14,7 +14,7 @@ module StoneWall
 
     # --------------
     # This is 1/3rd of the magic in this gem.  We earlier built a
-    # 'schpoo_with_stonepath' method on your class, and now we use
+    # 'schpoo_with_stonewall' method on your class, and now we use
     # alias_method_chain to wrap your original 'schpoo' method.
     # You will have no hope of understanding this if you don't understand
     # alias_method_chain, so go memorize that documentation.
