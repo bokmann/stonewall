@@ -21,11 +21,13 @@ module StoneWall
       # guarded methods defined in the dsl in the class.
       def self.define_attribute_methods_with_stonewall
         define_attribute_methods_without_stonewall
-        StoneWall::Helpers.fix_aliases_for(self)
+        StoneWall::Helpers.fix_aliases_for(self) # if a stonewall enhanced class?
       end
 
       class << self
-        alias_method_chain :define_attribute_methods, :stonewall
+        unless defined?(:define_attribute_methods_without_stonewall)
+          alias_method_chain :define_attribute_methods, :stonewall
+        end
       end
     end
 
