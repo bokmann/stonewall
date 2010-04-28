@@ -2,7 +2,7 @@ module StoneWall
   module Helpers
 
     def self.symbolize_role(role)
-      [String, Symbol].include?(role.class) ? role.to_sym : role.name.to_sym
+      [String, Symbol].include?(role.class) ? role.to_sym : role.name.parameterize("_").downcase.to_sym
     end
 
 
