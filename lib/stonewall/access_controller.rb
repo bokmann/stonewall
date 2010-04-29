@@ -8,6 +8,7 @@ module StoneWall
     attr_reader :variant_field
     attr_accessor :actions
     attr_reader :guarded_methods
+    attr_reader :guarded_attributes
     attr_accessor :method_groups
 
     # the matrix is the money-shot of the access controller.  You can set it
@@ -19,9 +20,13 @@ module StoneWall
     def initialize(guarded_class)
       @guarded_class = guarded_class
       @guarded_methods = Array.new
+      @guarded_attributes = Array.new
       @actions = Hash.new
       @matrix = Hash.new
       @method_groups = Hash.new
+      @method_groups[:readers] = Array.new
+      @method_groups[:writers] = Array.new
+      
     end
 
     def set_variant_field(field)
@@ -45,9 +50,19 @@ module StoneWall
     # This is similar to, but not the same as, the guard method on the parser.
     # The parser has to wait until the methods are reified.  Since this is
     # got adding guards at runtime, we don't have that restruction here.
-    def guard(method)
+    def guard_method(method)
       StoneWall::Helpers.guard(@guarded_class, method)
       StoneWall::Helpers.fix_alias_for(@guarded_class, method)
+    end
+    
+    def guard_attribute(attribute)
+      guarded_attributes << attribute
+      guard_method(attribute)
+      @method_groups[:readers] << attribute
+      
+      setter = (attribute.to_s + "=").to_sym
+      guard_method(setter)
+      @method_groups[:writers] << setter
     end
     
     # --------------

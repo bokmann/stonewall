@@ -26,12 +26,24 @@ module StoneWall
     end
     
     
-    # this is also a refactor-for-better-test opportunity.
-    def self.guard(guarded_class, m)
-      guarded_class.stonewall.guarded_methods << m
-      aliased_target, punctuation = m.to_s.sub(/([?!=])$/, ''), $1
+    def self.build_method_names(original_method_name)
+      aliased_target, punctuation = original_method_name.to_s.sub(/([?!=])$/, ''), $1
       checked_method = "#{aliased_target}_with_stonewall#{punctuation}"
-      unchecked_method = "#{aliased_target}_without_stonewall#{punctuation}"    
+      unchecked_method = "#{aliased_target}_without_stonewall#{punctuation}"
+      
+      return checked_method, unchecked_method
+    end
+    
+    
+    #neither of these methods belong here - they seem like access controller things.
+    # but I won't resolve that until we can do a proper refactoring with tests.
+    def self.guard_method(guarded_class, m)
+       guarded_class.stonewall.guarded_methods << m  #put this line where it belongs, and
+                                                    #this method truly becomes a helper, doing nothing but
+                                                    # defining the guard.
+                                                    
+      checked_method, unchecked_method = build_method_names(m)    
+      
       # --------------
       # This method is defined on the guarded class, so it is callable on
       # objects of that class.  This is 1/3rd of the magic of this gem-
@@ -47,5 +59,16 @@ module StoneWall
       end
       # -------------- end of bizzaro meta-juju
     end
+    
+    def self.guard_attribute(guarded_class, a)
+      guarded_class.stonewall.guarded_attributes << a
+      guard_method(guarded_class, a)
+      guarded_class.stonewall.method_groups[:readers] << a
+      
+      setter = (a.to_s + "=").to_sym
+      guard_method(guarded_class, setter)
+      guarded_class.stonewall.method_groups[:writers] << setter
+    end
+    
   end
 end

@@ -5,25 +5,17 @@ module StoneWall
       @method_groups = Hash.new
     end
 
-    def allowed_method(*methods)
-      methods.flatten.each do |m|
-        @parent.stonewall.add_grant(@role, @variant, m)
-      end
-    end
-
-    alias_method :allowed_methods, :allowed_method
-    end
-    
-    def allowed_method_group(*group_names)
-      group_names.flatten.each do |group_name|
-        @parent.stonewall.method_groups[group_name].each do |m|
-          allowed_method m
+    def allow(*alloweds)
+      alloweds.flatten.each do |allowed|
+        if @parent.stonewall.method_groups.keys.include?(allowed)
+          @parent.stonewall.method_groups[allowed].each do |m|
+            @parent.stonewall.add_grant(@role, @variant, m)
+          end
+        else
+          @parent.stonewall.add_grant(@role, @variant, m)
         end
       end
-    end
-
-    alias_method :allowed_method_groups, :allowed_method_group
-    end
+    end    
     
     def method_group(name, methods)
       @parent.stonewall.method_groups[name] = methods
@@ -45,11 +37,19 @@ module StoneWall
       yield Parser.new(@parent, @role, variant_name)
     end
 
-    def guard(*methods)
-      methods.each do |m|
-        StoneWall::Helpers.guard(@parent, m)
+    def guard_attribute(*attributes)
+      attributes.each do |m|
+        StoneWall::Helpers.guard_attribute(@parent, m)
       end
     end
-
+    alias_method :guard_attributes, :guard_attribute
+    
+    def guard_method(*methods)
+      methods.each do |m|
+        StoneWall::Helpers.guard_method(@parent, m)
+      end
+    end
+    alias_method :guard_methods, :guard_method
+    
   end
 end

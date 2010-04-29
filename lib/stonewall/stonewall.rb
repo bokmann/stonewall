@@ -25,7 +25,7 @@ module StoneWall
       end
 
       class << self
-        unless defined?(:define_attribute_methods_without_stonewall)
+        unless respond_to?(:define_attribute_methods_without_stonewall)
           alias_method_chain :define_attribute_methods, :stonewall
         end
       end
