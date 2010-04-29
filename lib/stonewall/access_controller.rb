@@ -85,6 +85,10 @@ module StoneWall
       
       v = guarded_object.send(variant_field) &&
           guarded_object.send(variant_field).to_sym
+      
+      # if the variant field isn't set, is this a reasonable thing to do?    
+      return true if v.nil?
+      
       user.stonewall_role_info.detect do |r|
         granted?(r, v, :all) || granted?(r, v, method)
       end || false
