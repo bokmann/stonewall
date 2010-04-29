@@ -14,4 +14,13 @@ ActiveRecord::Base.class_eval do
   
   # need to fix the update_attributes, read_attribute, and write_attribute problem here.
   
+  def update_attributes_with_stonewall(*args)
+    update_attributes_without_stonewall(*args)
+  end
+  alias_method_chain :update_attributes, :stonewall
+  
+  # design notes:
+  # it is intentional that we are not blocking read_attribute and write_attribute methods.
+  # These are rare in real world rails apps, and where they are being used, permissions
+  # would generally be a hinderance.
 end
