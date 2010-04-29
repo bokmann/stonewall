@@ -2,6 +2,10 @@ require 'helper'
 
 class TestUserExtensions < Test::Unit::TestCase
   
+  should "return true just to be a bad boy until my testing is in place" do
+    assert true
+  end
+  
   should "define 'may_send?' on the user class"
   
   should "define a 'stonewall_role_info' method on the user class"

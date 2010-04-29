@@ -2,6 +2,10 @@ require 'helper'
 
 class TestAccessController < Test::Unit::TestCase
   
+  should "return true just to be a bad boy until my testing is in place" do
+    assert true
+  end
+  
   should "hold a reference to the class it is guarding"
   
   should "keep track of the field we are varying behavior on"

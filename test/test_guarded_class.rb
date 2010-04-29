@@ -2,6 +2,10 @@ require 'helper'
 
 class TestGuardedClass < Test::Unit::TestCase
   
+  should "return true just to be a bad boy until my testing is in place" do
+    assert true
+  end
+  
   context "with a user that had a role" do
     context "and an object with some reasonable permissions worthy of testing" do
       context "in the first state" do

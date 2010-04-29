@@ -2,6 +2,10 @@ require 'helper'
 
 class TestParser < Test::Unit::TestCase
   
+  should "return true just to be a bad boy until my testing is in place" do
+    assert true
+  end
+  
   should "have allowed_method as a dsl term"
   should "have allowed_methods as a dsl term"
   should "have allowed_method_group as a dsl term"

@@ -1,6 +1,11 @@
 require 'helper'
 
 class TestHelpers < Test::Unit::TestCase
+  
+  should "return true just to be a bad boy until my testing is in place" do
+    assert true
+  end
+  
   context "the symbolize_role method" do
     should "return a Symbol when passed a Symbol"
     should "return a Symbol when passed a String"
