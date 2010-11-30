@@ -31,9 +31,9 @@ module StoneWall
         define_attribute_methods_without_stonewall
         StoneWall::Helpers.fix_aliases_for(self) # if a stonewall enhanced class?
       end
-
-      class << self
-        unless respond_to?(:define_attribute_methods_without_stonewall)
+      
+      unless respond_to?(:define_attribute_methods_without_stonewall)
+        class << self
           alias_method_chain :define_attribute_methods, :stonewall
         end
       end
