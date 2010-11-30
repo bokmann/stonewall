@@ -16,6 +16,15 @@ ActiveRecord::Base.class_eval do
   # need to fix the update_attributes, read_attribute, and write_attribute problem here.
   
   def update_attributes_with_stonewall(*args)
+    if respond_to?(:stonewall)
+      args[0].keys.each do |attribute|
+        attribute = attribute.to_sym unless attribute.class == Symbol
+      
+        if stonewall.guarded_attributes.include?(attribute)
+           raise Stonewall::AccessViolationException.new " \n User id: #{User.current.id}\n User role info: #{User.current.stonewall_role_info}\n Number of Roles for User: #{User.current.stonewall_role_info.length}\n Class: #{self.class.name}\n Object id: #{self.id}\n Method: #{attribute}=" unless allowed?((attribute.to_s + "=").to_sym)
+        end
+      end
+    end
     update_attributes_without_stonewall(*args)
   end
   alias_method_chain :update_attributes, :stonewall

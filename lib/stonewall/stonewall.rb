@@ -12,7 +12,15 @@ module StoneWall
                   "/user_extensions.rb"
         cattr_accessor :stonewall
         self.stonewall = StoneWall::AccessController.new(self)
-        yield StoneWall::Parser.new(self)
+        parser = StoneWall::Parser.new(self)
+        yield parser
+        
+        # if we are being used with acts_as_state_machine (at least, our patched
+        # version), then we also want the on_transition guards to function as
+        # action guards in stonewall.
+        if self.respond_to?(:aasm_events)
+          parser.guard_aasm_events
+        end
       end
 
       # --------------
