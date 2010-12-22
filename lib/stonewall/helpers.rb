@@ -54,7 +54,7 @@ module StoneWall
         if stonewall.allowed?(self, User.current, m)
           self.send(unchecked_method, *args)
         else
-          raise "Access Violation"
+          raise Stonewall::AccessViolationException.new " \n User id: #{User.current.id}\n User Role Info: #{User.current.stonewall_role_info}\n Number of Roles for User: #{User.current.stonewall_role_info.length}\n Class: #{self.class.name}\n Object id: #{self.id}\n Method: #{checked_method}"
         end
       end
       # -------------- end of bizzaro meta-juju

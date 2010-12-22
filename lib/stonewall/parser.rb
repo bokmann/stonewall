@@ -12,7 +12,7 @@ module StoneWall
             @parent.stonewall.add_grant(@role, @variant, m)
           end
         else
-          @parent.stonewall.add_grant(@role, @variant, m)
+          @parent.stonewall.add_grant(@role, @variant, allowed)
         end
       end
     end    
@@ -28,7 +28,17 @@ module StoneWall
     def action(action_name, &guard)
       @parent.stonewall.actions[action_name] = guard 
     end
-
+    
+    def guard_aasm_events
+      @parent.aasm_events.keys.each do |event|
+        @parent.stonewall.actions[event] = Proc.new { |object, user|          
+          User.do_as(user) {
+            object.send(("may_" + event.to_s + "?").to_sym)
+          }
+        }
+      end
+    end
+    
     def role(role_name)
       yield Parser.new(@parent, role_name)
     end
