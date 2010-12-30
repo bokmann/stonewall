@@ -3,8 +3,16 @@ ActiveRecord::Base.class_eval do
   def method_missing_with_stonewall(symb, *args)
     method_name = symb.to_s
     if method_name =~ /^may_(.+?)[\!\?]$/
-      klass = Class === args.first ? args.first : args.first.class
-      klass.stonewall.actions[$1.to_sym].call(args.first, self)
+      guard = $1
+      if guard.ends_with?("_any")
+        guard = guard.gsub("_any", "")
+        args.first.any?{ |o| o.class.stonewall.actions[guard.to_sym].call(o, self) }
+      elsif guard.ends_with?("_all")
+        guard = guard.gsub("_all", "")
+        args.first.all?{ |o| o.class.stonewall.actions[guard.to_sym].call(o, self) }
+      else
+        args.first.class.stonewall.actions[guard.to_sym].call(args.first, self)
+      end
     else
       method_missing_without_stonewall(symb, *args)
     end
@@ -33,4 +41,6 @@ ActiveRecord::Base.class_eval do
   # it is intentional that we are not blocking read_attribute and write_attribute methods.
   # These are rare in real world rails apps, and where they are being used, permissions
   # would generally be a hinderance.
+  
+  
 end
