@@ -5,18 +5,28 @@ ActiveRecord::Base.class_eval do
     if method_name =~ /^may_(.+?)[\!\?]$/
       guard = $1
       if guard.ends_with?("_any")
-        guard = guard.gsub("_any", "")
-        args.first.any?{ |o| o.class.stonewall.actions[guard.to_sym].call(o, self) }
+        guard = guard.gsub("_any", "").to_sym
+        unless args.first.first.class.stonewall.actions[guard]
+          return method_missing_without_stonewall(symb, *args)
+        end
+        args.first.any?{ |o| o.class.stonewall.actions[guard].call(o, self) }
       elsif guard.ends_with?("_all")
-        guard = guard.gsub("_all", "")
-        args.first.all?{ |o| o.class.stonewall.actions[guard.to_sym].call(o, self) }
+        guard = guard.gsub("_all", "").to_sym
+        unless args.first.first.class.stonewall.actions[guard]
+          return method_missing_without_stonewall(symb, *args)
+        end
+        args.first.all?{ |o| o.class.stonewall.actions[guard].call(o, self) }
       else
+        unless args.first.class.stonewall.actions[guard.to_sym]
+          return method_missing_without_stonewall(symb, *args)
+        end
         args.first.class.stonewall.actions[guard.to_sym].call(args.first, self)
       end
     else
       method_missing_without_stonewall(symb, *args)
     end
   end
+
   
   alias_method_chain :method_missing, :stonewall
   

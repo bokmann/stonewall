@@ -13,7 +13,7 @@ module StoneWall
         cattr_accessor :stonewall
         self.stonewall = StoneWall::AccessController.new(self)
         parser = StoneWall::Parser.new(self)
-        yield parser
+        yield parser if block_given?
         
         # if we are being used with acts_as_state_machine (at least, our patched
         # version), then we also want the on_transition guards to function as
