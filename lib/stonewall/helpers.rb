@@ -7,8 +7,10 @@ module StoneWall
 
 
     def self.fix_aliases_for(guarded_class)
-      guarded_class.stonewall.guarded_methods.each do |m|
-        fix_alias_for(guarded_class, m)
+      unless guarded_class.stonewall.nil?
+        guarded_class.stonewall.guarded_methods.each do |m|
+          fix_alias_for(guarded_class, m)
+        end
       end
     end
 
