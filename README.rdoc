@@ -14,13 +14,15 @@ There was an earlier, functional version in StonePath gems prior to 0.3.0.  This
 
 == Note on Patches/Pull Requests
  
-* Fork the project.
-* Make your feature addition or bug fix.
-* Add tests for it. This is important so I don't break it in a
-  future version unintentionally.
-* Commit, do not mess with rakefile, version, or history.
-  (if you want to have your own version, that is fine but bump version in a commit by itself I can ignore when I pull)
-* Send me a pull request. Bonus points for topic branches.
+This project is using gitflow.  Want a quick education?
+
+* http://nvie.com/posts/a-successful-git-branching-model/
+* https://github.com/nvie/gitflow
+* http://jeffkreeftmeijer.com/2010/why-arent-you-using-git-flow/
+
+The last link is really the best, but all are necessary to grok.
+
+If you want to give me a pullup request, branch from develop, make your changes (including tests), and send me a pullup request.
 
 == Copyright
 
